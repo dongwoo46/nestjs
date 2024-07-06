@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\dw\\Desktop\\Nest.js\\all_nestjs\\nestjs\\src\\logger\\logFile\\info\\.ee94a0bf2d666fc08400a0976c7f3715a0ab59d5-audit.json",
+    "files": [
+        {
+            "date": 1719843999802,
+            "name": "C:\\Users\\dw\\Desktop\\Nest.js\\all_nestjs\\nestjs\\src\\logger\\logFile\\info\\2024-07-01.info.log",
+            "hash": "9ac8dfd1c77f4c503b995906c1e88bf964ba291c2eb747616aef4a9542f62eb5"
+        }
+    ],
+    "hashType": "sha256"
+}
