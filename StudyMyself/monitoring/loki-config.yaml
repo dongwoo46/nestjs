@@ -1,0 +1,40 @@
+auth_enabled: false # 인증 비활성화
+
+server:
+  http_listen_port: 3100 # Loki 서버의 HTTP 포트
+
+ingester:
+  lifecycler:
+    address: 127.0.0.1
+    ring:
+      kvstore:
+        store: inmemory # 인메모리 키-값 저장소 사용
+    final_sleep: 0s # 종료 전 대기 시간
+
+schema_config:
+  configs:
+    - from: 2020-10-24 # 설정 시작 날짜
+      store: boltdb # 인덱스 저장소로 BoltDB 사용
+      object_store: filesystem # 객체 저장소로 파일 시스템 사용
+      schema: v11 # 스키마 버전
+      index:
+        prefix: index_ # 인덱스 프리픽스
+        period: 168h # 인덱스 주기 (7일)
+
+storage_config:
+  boltdb:
+    directory: /loki/index # BoltDB 저장소 디렉터리
+  filesystem:
+    directory: /loki/chunks # 파일 시스템 저장소 디렉터리
+
+limits_config:
+  enforce_metric_name: false # 메트릭 이름 강제 적용 안함
+  reject_old_samples: true # 오래된 샘플 거부
+  reject_old_samples_max_age: 168h # 오래된 샘플 최대 나이 (7일)
+
+chunk_store_config:
+  max_look_back_period: 0s # 최대 회고 기간
+
+table_manager:
+  retention_deletes_enabled: true # 보존 기간 삭제 활성화
+  retention_period: 336h # 데이터 보존 기간 (14일)
