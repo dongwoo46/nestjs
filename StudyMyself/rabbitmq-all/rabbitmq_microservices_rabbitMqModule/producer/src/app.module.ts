@@ -13,9 +13,9 @@ import { OrdersModule } from './orders/orders.module';
         options: {
           urls: ['amqp://user:password@localhost:5672'],
           queue: 'orders-queue',
-          // queueOptions: {
-          //   durable: false,
-          // },
+          queueOptions: {
+            durable: false,
+          },
         },
       },
     ]),
