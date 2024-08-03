@@ -6,7 +6,6 @@ import {
   Post,
   Body,
 } from '@nestjs/common';
-import * as amqp from 'amqplib';
 import { AppService } from './app.service';
 
 @Controller()
