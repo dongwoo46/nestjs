@@ -3,6 +3,7 @@ import { CreateAeDto } from './dto/create-ae.dto';
 import { UpdateAeDto } from './dto/update-ae.dto';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
+import * as zlib from 'zlib';
 
 @Injectable()
 export class AesService {
@@ -38,8 +39,6 @@ export class AesService {
   decryptFileToObject(filePath: string, key: string, iv: string): any {
     const keyBuffer = this.generateKey(key);
     const ivBuffer = this.generateIv(iv);
-    console.log(keyBuffer);
-    console.log(ivBuffer);
     const encryptedData = fs.readFileSync(filePath);
 
     const decipher = crypto.createDecipheriv(
@@ -56,23 +55,99 @@ export class AesService {
     return JSON.parse(jsonString);
   }
 
-  create(createAeDto: CreateAeDto) {
-    return 'This action adds a new ae';
+  async encryptString(content: string, key: string, iv: string) {
+    const keyBuffer = this.generateKey(key);
+    const ivBuffer = this.generateIv(iv);
+
+    const cipher = crypto.createCipheriv(this.algorithm, keyBuffer, ivBuffer);
+
+    const encrypted = Buffer.concat([
+      cipher.update(content, 'utf8'),
+      cipher.final(),
+    ]);
+
+    return encrypted;
   }
 
-  findAll() {
-    return `This action returns all aes`;
+  async makeEncryptedZipFile(content: string, key: string, iv: string) {
+    try {
+      const filePath =
+        'C:\\Users\\dw\\Desktop\\nestjs\\all_nestjs\\nestjs\\src\\aes\\encrypted_file';
+
+      const zipBuffer = await this.compressString(content);
+      console.log('zipbuffer', zipBuffer);
+
+      const unzipBuffer = await this.decompressString(zipBuffer);
+      console.log(unzipBuffer);
+
+      await this.bufferToEncrptedfile(zipBuffer, key, iv);
+
+      const decryptedBuffer = await this.decryptedFilepath(filePath, key, iv);
+      console.log('decryptedBuffer', decryptedBuffer);
+
+      const unzipedString = await this.decompressString(decryptedBuffer);
+
+      console.log('unzipedString', unzipedString);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} ae`;
+  // 압축된 버퍼 암호화해서 파일로 만들기
+  async bufferToEncrptedfile(buffer: Buffer, key: string, iv: string) {
+    const filePath =
+      'C:\\Users\\dw\\Desktop\\nestjs\\all_nestjs\\nestjs\\src\\aes\\encrypted_file';
+
+    const keyBuffer = this.generateKey(key);
+    const ivBuffer = this.generateIv(iv);
+
+    const cipher = crypto.createCipheriv(this.algorithm, keyBuffer, ivBuffer);
+
+    const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
+
+    await fs.writeFileSync(filePath, encrypted);
   }
 
-  update(id: number, updateAeDto: UpdateAeDto) {
-    return `This action updates a #${id} ae`;
+  async compressString(content: string): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      zlib.gzip(content, (err, buffer) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(buffer);
+      });
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ae`;
+  async decompressString(input: Buffer): Promise<string> {
+    return new Promise((resolve, reject) => {
+      zlib.gunzip(input, (err, buffer) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(buffer.toString('utf8'));
+      });
+    });
+  }
+
+  // 파일경로로 파일 읽어서 복호화하기
+  async decryptedFilepath(filepath: string, key: string, iv: string) {
+    const buffer = await fs.readFileSync(filepath);
+
+    const keyBuffer = this.generateKey(key);
+    const ivBuffer = this.generateIv(iv);
+
+    const decipher = crypto.createDecipheriv(
+      this.algorithm,
+      keyBuffer,
+      ivBuffer,
+    );
+    const decrypted = Buffer.concat([
+      decipher.update(buffer),
+      decipher.final(),
+    ]);
+
+    console.log(decrypted);
+    return decrypted;
   }
 }

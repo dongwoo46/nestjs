@@ -33,4 +33,18 @@ export class AesController {
     );
     res.json(decryptedData);
   }
+
+  @Public()
+  @Post('zip')
+  async zipAndEncrypted(
+    @Body('content') content: string,
+    @Res() res: Response,
+  ) {
+    const key = 'rlaehddnkey';
+    const iv = 'rlaehddniv';
+
+    await this.aesService.makeEncryptedZipFile(content, key, iv);
+
+    res.status(200).json({ message: 'ok' });
+  }
 }
