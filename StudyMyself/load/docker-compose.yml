@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  app1:
+    image: load-docker
+    ports:
+      - '3001:3000'
+    environment:
+      - NODE_ENV=production
+
+  app2:
+    image: load-docker
+    ports:
+      - '3002:3000'
+    environment:
+      - NODE_ENV=production
+
+  app3:
+    image: load-docker
+    ports:
+      - '3003:3000'
+    environment:
+      - NODE_ENV=production
+
+  app4:
+    image: load-docker
+    ports:
+      - '3004:3000'
+    environment:
+      - NODE_ENV=production
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app1
+      - app2
+      - app3
+      - app4

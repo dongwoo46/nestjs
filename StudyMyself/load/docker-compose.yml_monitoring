@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  prometheus_load:
+    image: prom/prometheus
+    container_name: prometheus_load
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana_load:
+    image: grafana/grafana
+    container_name: grafana_load
+    ports:
+      - '3001:3000'
+
+  node_exporter_load:
+    image: prom/node-exporter
+    container_name: node_exporter_load
+    ports:
+      - '9100:9100'
+
+  nestjs_app_load:
+    build: .
+    container_name: nestjs_app_load
+    ports:
+      - '3000:3000'
+    depends_on:
+      - prometheus_load
+      - node_exporter_load
+      - grafana_load
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge

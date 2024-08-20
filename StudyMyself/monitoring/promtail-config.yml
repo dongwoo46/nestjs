@@ -1,0 +1,18 @@
+server:
+  http_listen_port: 9080 # Promtail 서버의 HTTP 포트
+  grpc_listen_port: 0 # gRPC 포트 (비활성화)
+
+positions:
+  filename: /tmp/positions.yaml # 로그 포지션 파일 위치 (로그를 어디까지 읽었는지 저장)
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push # Loki 서버 URL
+
+scrape_configs:
+  - job_name: system # 작업 이름
+    static_configs:
+      - targets:
+          - localhost # 타겟 (Promtail 자신)
+        labels:
+          job: varlogs # 라벨
+          __path__: /var/log/*log # 수집할 로그 파일 경로 (예: /var/log 디렉토리 내의 모든 .log 파일)
