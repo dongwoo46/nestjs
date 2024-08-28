@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MemberModule } from './member/member.module';
 import { OrderModule } from './order/order.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Order } from './order/domain/entities/order.entity';
-import { MemberEntity } from './member/domain/entities/member.entity';
+import { ArticleModule } from './article/article.module';
+import { UserModule } from './user/user.module';
+import { Article } from './article/entities/article.entity';
+import { User } from './user/entities/user.entity';
+import { MemberModule } from './member/member.module';
 
 @Module({
   imports: [
-    MemberModule,
     OrderModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -18,10 +20,13 @@ import { MemberEntity } from './member/domain/entities/member.entity';
       username: 'postgres',
       password: '1234',
       database: 'postgres',
-      entities: [MemberEntity, Order],
+      entities: [Article, Order, User],
       synchronize: true,
-      dropSchema: true,
+      dropSchema: false,
     }),
+    ArticleModule,
+    UserModule,
+    MemberModule,
   ],
   controllers: [AppController],
   providers: [AppService],
