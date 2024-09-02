@@ -10,9 +10,18 @@ Content-Type: application/json
 ### 모든 데이터 다 가져오기
 GET http://localhost:3000/articles
 
-
 ### pagnation
+GET http://localhost:3000/articles/pagination?page=2&take=10
+
+### 커서 페이지네이션
+GET http://localhost:3000/articles/cursorPaginate?take=10&sort=DESC&cursorId=10
+
+### 커서 페이지네이션
+GET http://localhost:3000/articles/cursorPaginate
+
+
+### filter
 GET http://localhost:3000/articles/search?title=title100
 
-### pagnation
+### filter
 GET http://localhost:3000/articles/search?context=search

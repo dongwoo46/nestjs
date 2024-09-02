@@ -11,4 +11,6 @@ export class Article {
   context: string;
   @Column({ nullable: true })
   name: string;
+  @Column({ nullable: true })
+  price: number;
 }

@@ -3,7 +3,10 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { Article } from './entities/article.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { LessThan, Like, Repository } from 'typeorm';
+import { CursorPageOptionsDto } from './dto/cursor/cursor-page.options';
+import { CursorPageDto } from './dto/cursor/cursor-page.dto';
+import { CursorPageMetaDto } from './dto/cursor/cursor-page.meta.dto';
 
 @Injectable()
 export class ArticlesService {
@@ -20,7 +23,48 @@ export class ArticlesService {
     return this.articleRepository.save(createArticleDto);
   }
 
-  async paginate(page: number = 1, take: number = 5): Promise<any> {
+  // cursor paginatnion
+  async cursorBasedPaginated(
+    cursorPageOptionsDto: CursorPageOptionsDto,
+  ): Promise<CursorPageDto<Article>> {
+    console.log(cursorPageOptionsDto);
+    const [articles, total] = await this.articleRepository.findAndCount({
+      take: cursorPageOptionsDto.take,
+      where: cursorPageOptionsDto.cursorId
+        ? {
+            id: LessThan(cursorPageOptionsDto.cursorId),
+          }
+        : null,
+      order: {
+        id: cursorPageOptionsDto.sort,
+      },
+    });
+
+    //페이지 당 가져올 데이터 갯수
+    const takePerPage = cursorPageOptionsDto.take;
+    //페이지가 마지막 데이터를 가지고 있는지에 대한 불리언 값
+    const isLastPage = articles.length < takePerPage;
+
+    //meta 정보에 넘겨줄 값이다. default로 true를 유지하고 isLastPage일 시 false를 반환케끔 한다.
+    let hasNextData = !isLastPage;
+    let cursor: number | null = null;
+
+    if (articles.length > 0) {
+      cursor = articles[articles.length - 1].id;
+    }
+
+    const cursorPageMetaDto = new CursorPageMetaDto({
+      cursorPageOptionsDto,
+      total,
+      hasNextData,
+      cursor,
+    });
+
+    return new CursorPageDto(articles, cursorPageMetaDto);
+  }
+
+  // offset 기반 pagination
+  async paginate(page: number, take: number): Promise<any> {
     // take=> limit, skip => offset - take 몇개의 데이터를 가지고 올것인가 , skip = 몇번재에 있는 데이터를 take만큼 가지고 올 것 인가?
     const [articles, total] = await this.articleRepository.findAndCount({
       take,
@@ -57,6 +101,20 @@ export class ArticlesService {
     });
 
     return articles;
+  }
+
+  async createCustomCursor(cursorIndex: number): Promise<string> {
+    const products = await this.articleRepository.find();
+
+    const customCursor = products.map((product) => {
+      const id = product.id;
+      const price = product.price;
+      const customCursor: string =
+        String(price).padStart(7, '0') + String(id).padStart(7, '0');
+      return customCursor;
+    });
+
+    return customCursor[cursorIndex];
   }
 
   findAll() {

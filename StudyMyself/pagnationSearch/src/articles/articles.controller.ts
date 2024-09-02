@@ -16,6 +16,8 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger as WinstonLogger } from 'winston';
 import { Article } from './entities/article.entity';
+import { CursorPageOptionsDto } from './dto/cursor/cursor-page.options';
+import { CursorPageDto } from './dto/cursor/cursor-page.dto';
 
 @Controller('articles')
 export class ArticlesController {
@@ -34,9 +36,28 @@ export class ArticlesController {
     return this.articlesService.findAll();
   }
 
+  @Get('cursorPaginate')
+  async cursorPaginate(
+    @Query() { take = 5, sort, cursorId }: CursorPageOptionsDto,
+  ): Promise<CursorPageDto<Article>> {
+    return await this.articlesService.cursorBasedPaginated({
+      take,
+      sort,
+      cursorId,
+    });
+  }
+
   @Get('/pagination')
-  async paginate(@Query('page') page: number = 1): Promise<Article[]> {
-    return await this.articlesService.paginate(page);
+  async paginate(
+    @Query('page') page: number = 1,
+    @Query('take') take: number = 10,
+  ): Promise<{
+    data: Article[];
+    meta: { total: number; page: number; last_page: number };
+  }> {
+    const pageNumber = parseInt(page as any, 10) || 1;
+    const takeNumber = parseInt(take as any, 10) || 10;
+    return await this.articlesService.paginate(pageNumber, takeNumber);
   }
 
   @Get('/search')
