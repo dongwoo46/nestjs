@@ -6,6 +6,12 @@ import { ArticleModule } from './article/article.module';
 import { databaseConfig } from './shared/config/database.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AopModule } from '@toss/nestjs-aop';
+import {
+  I18nModule,
+  I18nJsonLoader,
+  AcceptLanguageResolver,
+} from 'nestjs-i18n';
+import * as path from 'path';
 
 @Module({
   imports: [
@@ -19,6 +25,18 @@ import { AopModule } from '@toss/nestjs-aop';
     }),
     ArticleModule,
     AopModule,
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: path.join(process.cwd(), 'src', 'i18n'), // 절대 경로 설정
+        watch: true,
+      },
+      loader: I18nJsonLoader,
+      resolvers: [
+        // new HeaderResolver(['Accept-Language']),
+        AcceptLanguageResolver,
+      ],
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
